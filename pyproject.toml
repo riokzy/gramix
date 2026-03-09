@@ -4,25 +4,42 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "gramix"
-version = "0.1.2"
-description = "Мощный фреймворк для создания Telegram ботов."
+version = "0.1.6"
+description = "A fast, fully-typed Python framework for building Telegram bots."
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.10"
 authors = [
-    { name = "riokzy" }
+    { name = "riokzy", email = "riokzy.official@gmail.com" }
 ]
-keywords = ["telegram", "bot", "framework", "async", "gramix"]
+keywords = [
+    "telegram",
+    "bot",
+    "framework",
+    "fsm",
+    "finite-state-machine",
+    "middleware",
+    "webhooks",
+    "async",
+    "asyncio",
+    "typed",
+    "gramix",
+]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3 :: Only",
     "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development :: Libraries :: Python Modules",
     "Topic :: Communications :: Chat",
+    "Framework :: AsyncIO",
     "Typing :: Typed",
 ]
 dependencies = [
@@ -35,12 +52,16 @@ fastapi = ["fastapi>=0.100", "uvicorn>=0.20"]
 dev = [
     "pytest>=7.0",
     "pytest-asyncio>=0.21",
+    "black>=23.0",
+    "mypy>=1.0",
 ]
 
 [project.urls]
 Homepage = "https://github.com/riokzyofficial-debug/gramix"
 Repository = "https://github.com/riokzyofficial-debug/gramix"
-Issues = "https://github.com/riokzyofficial-debug/gramix/issues"
+Documentation = "https://github.com/riokzyofficial-debug/gramix#readme"
+"Bug Tracker" = "https://github.com/riokzyofficial-debug/gramix/issues"
+Changelog = "https://github.com/riokzyofficial-debug/gramix/blob/main/CHANGELOG.md"
 
 [tool.setuptools.packages.find]
 where = ["."]
