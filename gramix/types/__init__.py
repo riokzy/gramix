@@ -3,8 +3,17 @@ from gramix.types.chat import Chat, ChatType
 from gramix.types.message import Message, PhotoSize, Document, Audio, Video, Voice, Sticker
 from gramix.types.callback import CallbackQuery
 from gramix.types.keyboard import Inline, Reply, RemoveKeyboard
-from gramix.types.inline_query import InlineQuery, InlineQueryResultArticle
+from gramix.types.inline_query import (
+    InlineQuery,
+    InlineQueryResultArticle,
+    InlineQueryResultPhoto,
+    InlineQueryResultGif,
+    InlineQueryResultVideo,
+    InlineQueryResultDocument,
+    InlineQueryResultAudio,
+)
 from gramix.types.chat_member import ChatMemberUpdated
+from gramix.types.poll import Poll, PollOption, PollAnswer
 
 __all__ = [
     "User",
@@ -23,5 +32,13 @@ __all__ = [
     "RemoveKeyboard",
     "InlineQuery",
     "InlineQueryResultArticle",
+    "InlineQueryResultPhoto",
+    "InlineQueryResultGif",
+    "InlineQueryResultVideo",
+    "InlineQueryResultDocument",
+    "InlineQueryResultAudio",
     "ChatMemberUpdated",
+    "Poll",
+    "PollOption",
+    "PollAnswer",
 ]
