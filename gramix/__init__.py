@@ -41,7 +41,7 @@ from gramix.types import (
     Voice,
 )
 
-__version__ = "0.1.2"
+__version__ = "0.1.6"
 __author__ = "riokzy"
 __license__ = "MIT"
 
