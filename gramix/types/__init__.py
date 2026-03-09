@@ -14,6 +14,8 @@ from gramix.types.inline_query import (
 )
 from gramix.types.chat_member import ChatMemberUpdated
 from gramix.types.poll import Poll, PollOption, PollAnswer
+from gramix.types.location import Location, Venue
+from gramix.types.payment import PreCheckoutQuery, SuccessfulPayment, LabeledPrice, OrderInfo
 
 __all__ = [
     "User",
@@ -41,4 +43,10 @@ __all__ = [
     "Poll",
     "PollOption",
     "PollAnswer",
+    "Location",
+    "Venue",
+    "PreCheckoutQuery",
+    "SuccessfulPayment",
+    "LabeledPrice",
+    "OrderInfo",
 ]

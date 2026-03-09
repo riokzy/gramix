@@ -5,7 +5,10 @@ from typing import TYPE_CHECKING
 from gramix.types.user import User
 from gramix.types.chat import Chat
 from gramix.types.keyboard import Inline, Reply, RemoveKeyboard
-from gramix.constants import MAX_MESSAGE_LENGTH, MAX_CAPTION_LENGTH
+from gramix.types.poll import Poll
+from gramix.types.location import Location, Venue
+from gramix.types.payment import SuccessfulPayment
+from gramix.constants import MAX_MESSAGE_LENGTH, MAX_CAPTION_LENGTH, _SENTINEL
 from gramix.exceptions import MessageError
 
 if TYPE_CHECKING:
@@ -149,7 +152,8 @@ class Message:
         "message_id", "date", "chat", "from_user",
         "text", "photo", "document", "audio", "video",
         "voice", "sticker", "caption", "reply_to_message",
-        "forward_from", "forward_date", "_bot",
+        "forward_from", "forward_date", "reply_markup", "poll",
+        "location", "venue", "successful_payment", "_bot",
     )
 
     def __init__(
@@ -170,6 +174,11 @@ class Message:
         forward_from: User | None,
         forward_date: int | None,
         bot: Bot,
+        reply_markup: dict | None = None,
+        poll: Poll | None = None,
+        location: Location | None = None,
+        venue: Venue | None = None,
+        successful_payment: SuccessfulPayment | None = None,
     ) -> None:
         self.message_id = message_id
         self.date = date
@@ -186,6 +195,11 @@ class Message:
         self.reply_to_message = reply_to_message
         self.forward_from = forward_from
         self.forward_date = forward_date
+        self.reply_markup = reply_markup
+        self.poll = poll
+        self.location = location
+        self.venue = venue
+        self.successful_payment = successful_payment
         self._bot = bot
 
     @property
@@ -197,7 +211,7 @@ class Message:
         text: str,
         *,
         keyboard: Inline | Reply | RemoveKeyboard | None = None,
-        parse_mode: str | None = None,
+        parse_mode: str | None = _SENTINEL,
         disable_preview: bool = False,
     ) -> Message:
         if len(text) > MAX_MESSAGE_LENGTH:
@@ -216,7 +230,7 @@ class Message:
         text: str,
         *,
         keyboard: Inline | Reply | RemoveKeyboard | None = None,
-        parse_mode: str | None = None,
+        parse_mode: str | None = _SENTINEL,
         disable_preview: bool = False,
     ) -> Message:
         if len(text) > MAX_MESSAGE_LENGTH:
@@ -234,7 +248,7 @@ class Message:
         text: str,
         *,
         keyboard: Inline | None = None,
-        parse_mode: str | None = None,
+        parse_mode: str | None = _SENTINEL,
     ) -> Message:
         return self._bot.edit_message_text(
             chat_id=self.chat.id,
@@ -372,4 +386,9 @@ class Message:
             forward_from=User.from_dict(data["forward_from"]) if "forward_from" in data else None,
             forward_date=data.get("forward_date"),
             bot=bot,
+            reply_markup=data.get("reply_markup"),
+            poll=Poll.from_dict(data["poll"]) if "poll" in data else None,
+            location=Location.from_dict(data["location"]) if "location" in data else None,
+            venue=Venue.from_dict(data["venue"]) if "venue" in data else None,
+            successful_payment=SuccessfulPayment.from_dict(data["successful_payment"]) if "successful_payment" in data else None,
         )
