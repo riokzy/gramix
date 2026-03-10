@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 
 
 class CallbackQuery:
-    __slots__ = ("id", "from_user", "message", "data", "inline_message_id", "_bot")
+    __slots__ = ("id", "from_user", "message", "data", "inline_message_id", "game_short_name", "_bot")
 
     def __init__(
         self,
@@ -19,12 +19,14 @@ class CallbackQuery:
         data: str | None,
         inline_message_id: str | None,
         bot: Bot,
+        game_short_name: str | None = None,
     ) -> None:
         self.id = id
         self.from_user = from_user
         self.message = message
         self.data = data
         self.inline_message_id = inline_message_id
+        self.game_short_name = game_short_name
         self._bot = bot
 
     def answer(
@@ -51,5 +53,6 @@ class CallbackQuery:
             message=Message.from_dict(data["message"], bot) if "message" in data else None,
             data=data.get("data"),
             inline_message_id=data.get("inline_message_id"),
+            game_short_name=data.get("game_short_name"),
             bot=bot,
         )

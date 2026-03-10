@@ -289,7 +289,7 @@ class Message:
         *,
         caption: str | None = None,
         keyboard: Inline | Reply | None = None,
-        parse_mode: str | None = None,
+        parse_mode: str | None = _SENTINEL,
     ) -> Message:
         if caption and len(caption) > MAX_CAPTION_LENGTH:
             raise MessageError(f"Подпись превышает {MAX_CAPTION_LENGTH} символов.")
@@ -321,7 +321,7 @@ class Message:
         *,
         caption: str | None = None,
         keyboard: Inline | Reply | None = None,
-        parse_mode: str | None = None,
+        parse_mode: str | None = _SENTINEL,
     ) -> Message:
         return self._bot.send_video(
             chat_id=self.chat.id,

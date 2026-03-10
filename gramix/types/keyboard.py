@@ -2,7 +2,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from gramix.constants import MAX_CALLBACK_DATA_LENGTH
-from gramix.exceptions import FilterError
 
 
 @dataclass(slots=True)
@@ -17,7 +16,7 @@ class InlineButton:
         btn: dict = {"text": self.text}
         if self.callback_data is not None:
             if len(self.callback_data) > MAX_CALLBACK_DATA_LENGTH:
-                raise FilterError(
+                raise ValueError(
                     f"callback_data не должен превышать {MAX_CALLBACK_DATA_LENGTH} символов."
                 )
             btn["callback_data"] = self.callback_data

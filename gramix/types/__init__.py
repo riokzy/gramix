@@ -16,6 +16,7 @@ from gramix.types.chat_member import ChatMemberUpdated
 from gramix.types.poll import Poll, PollOption, PollAnswer
 from gramix.types.location import Location, Venue
 from gramix.types.payment import PreCheckoutQuery, SuccessfulPayment, LabeledPrice, OrderInfo
+from gramix.types.game import GameHighScore
 
 __all__ = [
     "User",
@@ -49,4 +50,5 @@ __all__ = [
     "SuccessfulPayment",
     "LabeledPrice",
     "OrderInfo",
+    "GameHighScore",
 ]
