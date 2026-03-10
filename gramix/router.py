@@ -37,6 +37,7 @@ class Router:
         self._callback_handlers: list[Handler] = []
         self._inline_handlers: list[Handler] = []
         self._chat_member_handlers: list[Callable] = []
+        self._game_callback_handlers: list[Callable] = []
         self._state_handlers: dict[str, Callable] = {}
         self._poll_answer_handlers: list[Callable] = []
         self._pre_checkout_handlers: list[Callable] = []
@@ -76,6 +77,12 @@ class Router:
     def chat_member(self) -> Callable:
         def decorator(func: Callable) -> Callable:
             self._chat_member_handlers.append(func)
+            return func
+        return decorator
+
+    def game_callback(self) -> Callable:
+        def decorator(func: Callable) -> Callable:
+            self._game_callback_handlers.append(func)
             return func
         return decorator
 
@@ -168,14 +175,28 @@ class Router:
         return False
 
     def process_chat_member(self, update: ChatMemberUpdated) -> bool:
+        called = False
         for func in self._chat_member_handlers:
             self._call(func, update)
+            called = True
+        return called
+
+    async def async_process_chat_member(self, update: ChatMemberUpdated) -> bool:
+        called = False
+        for func in self._chat_member_handlers:
+            await self._async_call(func, update)
+            called = True
+        return called
+
+    def process_game_callback(self, callback: "CallbackQuery") -> bool:
+        for func in self._game_callback_handlers:
+            self._call(func, callback)
             return True
         return False
 
-    async def async_process_chat_member(self, update: ChatMemberUpdated) -> bool:
-        for func in self._chat_member_handlers:
-            await self._async_call(func, update)
+    async def async_process_game_callback(self, callback: "CallbackQuery") -> bool:
+        for func in self._game_callback_handlers:
+            await self._async_call(func, callback)
             return True
         return False
 

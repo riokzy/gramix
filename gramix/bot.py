@@ -70,15 +70,16 @@ class Bot:
             raise TelegramAPIError(code, description)
         return data["result"]
 
-    def _request(self, method: str, payload: dict) -> Any:
+    def _request(self, method: str, payload: dict, http_timeout: float | None = None) -> Any:
         url = self._build_url(method)
         clean_payload = {k: v for k, v in payload.items() if v is not None}
         delay = RETRY_DELAY
         last_retry_after: RetryAfterError | None = None
+        req_timeout = http_timeout if http_timeout is not None else self._timeout
 
         for attempt in range(1, RETRY_ATTEMPTS + 1):
             try:
-                response = self._get_sync_client().post(url, json=clean_payload)
+                response = self._get_sync_client().post(url, json=clean_payload, timeout=req_timeout)
                 return self._parse_response(response)
             except RetryAfterError as e:
                 last_retry_after = e
@@ -97,18 +98,19 @@ class Bot:
             raise last_retry_after
         raise NetworkError(f"Запрос {method} не выполнен после {RETRY_ATTEMPTS} попыток.")
 
-    async def _async_request(self, method: str, payload: dict) -> Any:
+    async def _async_request(self, method: str, payload: dict, http_timeout: float | None = None) -> Any:
         url = self._build_url(method)
         clean_payload = {k: v for k, v in payload.items() if v is not None}
         delay = RETRY_DELAY
         last_retry_after: RetryAfterError | None = None
+        req_timeout = http_timeout if http_timeout is not None else self._timeout
 
         if self._async_client is None or self._async_client.is_closed:
             self._async_client = httpx.AsyncClient(timeout=self._timeout)
 
         for attempt in range(1, RETRY_ATTEMPTS + 1):
             try:
-                response = await self._async_client.post(url, json=clean_payload)
+                response = await self._async_client.post(url, json=clean_payload, timeout=req_timeout)
                 return self._parse_response(response)
             except RetryAfterError as e:
                 last_retry_after = e
@@ -171,6 +173,7 @@ class Bot:
                 last = self.send_message(
                     chat_id, chunk,
                     reply_to_message_id=reply_to_message_id,
+                    keyboard=keyboard,
                     parse_mode=parse_mode,
                     disable_preview=disable_preview,
                 )
@@ -206,6 +209,7 @@ class Bot:
                 last = await self.async_send_message(
                     chat_id, chunk,
                     reply_to_message_id=reply_to_message_id,
+                    keyboard=keyboard,
                     parse_mode=parse_mode,
                     disable_preview=disable_preview,
                 )
@@ -553,7 +557,7 @@ class Bot:
             "limit": limit,
             "timeout": timeout,
             "allowed_updates": allowed_updates,
-        })
+        }, http_timeout=float(timeout) + 2.0)
 
     async def async_get_updates(
         self,
@@ -567,7 +571,7 @@ class Bot:
             "limit": limit,
             "timeout": timeout,
             "allowed_updates": allowed_updates,
-        })
+        }, http_timeout=float(timeout) + 2.0)
 
     def set_webhook(
         self,
@@ -804,6 +808,61 @@ class Bot:
             "ok": ok,
             "error_message": error_message,
         })
+
+    def send_game(
+        self,
+        chat_id: int | str,
+        game_short_name: str,
+        *,
+        keyboard: "Inline | None" = None,
+    ) -> "Message":
+        data = self._request("sendGame", {
+            "chat_id": chat_id,
+            "game_short_name": game_short_name,
+            "reply_markup": self._keyboard_dict(keyboard),
+        })
+        return Message.from_dict(data, self)
+
+    def set_game_score(
+        self,
+        user_id: int,
+        score: int,
+        *,
+        chat_id: int | str | None = None,
+        message_id: int | None = None,
+        inline_message_id: str | None = None,
+        force: bool = False,
+        disable_edit_return: bool = False,
+    ) -> "Message | bool":
+        data = self._request("setGameScore", {
+            "user_id": user_id,
+            "score": score,
+            "chat_id": chat_id,
+            "message_id": message_id,
+            "inline_message_id": inline_message_id,
+            "force": force if force else None,
+            "disable_edit_message": disable_edit_return if disable_edit_return else None,
+        })
+        if isinstance(data, dict):
+            return Message.from_dict(data, self)
+        return data
+
+    def get_game_high_scores(
+        self,
+        user_id: int,
+        *,
+        chat_id: int | str | None = None,
+        message_id: int | None = None,
+        inline_message_id: str | None = None,
+    ) -> list:
+        from gramix.types.game import GameHighScore
+        data = self._request("getGameHighScores", {
+            "user_id": user_id,
+            "chat_id": chat_id,
+            "message_id": message_id,
+            "inline_message_id": inline_message_id,
+        })
+        return [GameHighScore.from_dict(entry) for entry in data]
 
     def close(self) -> None:
         if self._sync_client and not self._sync_client.is_closed:

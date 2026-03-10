@@ -35,6 +35,10 @@ class StateMeta(type):
 class State(metaclass=StateMeta):
     _steps: list[str] = []
 
+    def __init_subclass__(cls, **kwargs: object) -> None:
+        super().__init_subclass__(**kwargs)
+        _register_state(cls)
+
 
 class StateContext:
     __slots__ = ("_state_class", "_current_step", "data", "_user_id", "_storage")
@@ -147,11 +151,15 @@ class MemoryStorage(BaseStorage):
         return self._storage[user_id]
 
     def set(self, user_id: int, state_class: str, step: str, data: dict) -> None:
+        # No-op: state is held by StateContext object directly in self._storage.
+        # StateContext mutates its own fields (_state_class, _current_step, data),
+        # so there is nothing to persist separately for in-memory storage.
         pass
 
     def delete(self, user_id: int) -> None:
         if user_id in self._storage:
             self._storage[user_id]._reset()
+            del self._storage[user_id]
 
     def clear_all(self) -> None:
         self._storage.clear()
@@ -234,6 +242,17 @@ class SQLiteStorage(BaseStorage):
             self._conn.execute("DELETE FROM fsm_states")
             self._conn.commit()
 
+    def close(self) -> None:
+        """Close the underlying SQLite connection."""
+        with self._lock:
+            self._conn.close()
+
+    def __enter__(self) -> "SQLiteStorage":
+        return self
+
+    def __exit__(self, *_: object) -> None:
+        self.close()
+
 
 _state_registry: dict[str, type[State]] = {}
 
@@ -246,14 +265,5 @@ def _find_state_class(name: str) -> type[State] | None:
     return _state_registry.get(name)
 
 
-_original_new = StateMeta.__new__
 
 
-def _patched_new(mcs: type, name: str, bases: tuple, namespace: dict) -> StateMeta:
-    cls = _original_new(mcs, name, bases, namespace)
-    if name != "State":
-        _register_state(cls)
-    return cls
-
-
-StateMeta.__new__ = _patched_new

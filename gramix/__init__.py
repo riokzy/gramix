@@ -5,6 +5,7 @@ from gramix.bot import Bot
 from gramix.constants import ParseMode
 from gramix.dispatcher import Dispatcher
 from gramix.env import load_env
+from gramix.throttling import ThrottlingMiddleware
 from gramix.exceptions import (
     FileError,
     FilterError,
@@ -28,6 +29,7 @@ from gramix.types import (
     ChatMemberUpdated,
     ChatType,
     Document,
+    GameHighScore,
     Inline,
     InlineQuery,
     InlineQueryResultArticle,
@@ -54,13 +56,15 @@ from gramix.types import (
     Voice,
 )
 
-__version__ = "0.1.7"
+__version__ = "0.1.8"
 __author__ = "riokzy"
 __license__ = "MIT"
 
 logging.getLogger(__name__).addHandler(logging.NullHandler())
 
 __all__ = [
+    "GameHighScore",
+    "ThrottlingMiddleware",
     "Bot",
     "Dispatcher",
     "Router",

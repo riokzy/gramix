@@ -13,7 +13,8 @@ class MiddlewareManager:
 
     def register(self, func: Callable) -> Callable:
         self._middlewares.append(func)
-        logger.debug("Middleware зарегистрирован: %s", func.__name__)
+        name = func.__name__ if hasattr(func, "__name__") else type(func).__name__
+        logger.debug("Middleware зарегистрирован: %s", name)
         return func
 
     def run(self, update: Any, handler: Callable) -> None:
@@ -37,7 +38,10 @@ class MiddlewareManager:
                 async def next_fn() -> None:
                     await call_next(idx + 1)
 
-                if asyncio.iscoroutinefunction(mw):
+                # If the middleware exposes async_call, use it (e.g. ThrottlingMiddleware).
+                if hasattr(mw, "async_call"):
+                    await mw.async_call(update, next_fn)
+                elif asyncio.iscoroutinefunction(mw):
                     await mw(update, next_fn)
                 else:
                     mw(update, next_fn)

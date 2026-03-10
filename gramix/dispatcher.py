@@ -28,6 +28,7 @@ class Dispatcher:
         self._running = False
         self._startup_handlers: list[Callable] = []
         self._shutdown_handlers: list[Callable] = []
+        self._webhook_secret: str | None = None
 
     def include(self, router: Router) -> None:
         self._routers.append(router)
@@ -75,9 +76,14 @@ class Dispatcher:
 
         elif "callback_query" in raw_update:
             cb = CallbackQuery.from_dict(raw_update["callback_query"], self._bot)
-            for router in self._routers:
-                if router.process_callback(cb):
-                    break
+            if cb.game_short_name is not None:
+                for router in self._routers:
+                    if router.process_game_callback(cb):
+                        break
+            else:
+                for router in self._routers:
+                    if router.process_callback(cb):
+                        break
 
         elif "inline_query" in raw_update:
             query = InlineQuery.from_dict(raw_update["inline_query"], self._bot)
@@ -136,9 +142,14 @@ class Dispatcher:
 
         elif "callback_query" in raw_update:
             cb = CallbackQuery.from_dict(raw_update["callback_query"], self._bot)
-            for router in self._routers:
-                if await router.async_process_callback(cb):
-                    break
+            if cb.game_short_name is not None:
+                for router in self._routers:
+                    if await router.async_process_game_callback(cb):
+                        break
+            else:
+                for router in self._routers:
+                    if await router.async_process_callback(cb):
+                        break
 
         elif "inline_query" in raw_update:
             query = InlineQuery.from_dict(raw_update["inline_query"], self._bot)
@@ -193,11 +204,12 @@ class Dispatcher:
         host: str = "0.0.0.0",
         port: int = 8080,
         webhook_url: str | None = None,
+        secret_token: str | None = None,
         backend: str = "raw",
         drop_pending: bool = True,
     ) -> None:
         if webhook:
-            self._run_webhook(host=host, port=port, url=webhook_url, backend=backend)
+            self._run_webhook(host=host, port=port, url=webhook_url, secret_token=secret_token, backend=backend)
         else:
             self._run_polling(drop_pending=drop_pending)
 
@@ -226,13 +238,17 @@ class Dispatcher:
                 pass
 
         self._running = True
+        self._stop_event = threading.Event()
         offset: int | None = None
+        _CHUNK = 1
 
         def poll() -> None:
             nonlocal offset
-            while self._running:
+            while not self._stop_event.is_set():
                 try:
-                    updates = self._bot.get_updates(offset=offset, timeout=POLLING_TIMEOUT)
+                    updates = self._bot.get_updates(offset=offset, timeout=_CHUNK)
+                    if self._stop_event.is_set():
+                        break
                     for update in updates:
                         offset = update["update_id"] + 1
                         try:
@@ -240,22 +256,25 @@ class Dispatcher:
                         except Exception:
                             logger.exception("Ошибка при обработке update %d:", update["update_id"])
                 except NetworkError as e:
-                    if self._running:
+                    if not self._stop_event.is_set():
                         logger.warning("Сетевая ошибка: %s. Переподключение...", e)
-                        time.sleep(3)
+                        self._stop_event.wait(timeout=3)
                 except TelegramAPIError as e:
-                    logger.error("Telegram API ошибка: %s", e)
-                    time.sleep(1)
+                    if not self._stop_event.is_set():
+                        logger.error("Telegram API ошибка: %s", e)
+                        self._stop_event.wait(timeout=1)
                 except Exception:
-                    if self._running:
+                    if not self._stop_event.is_set():
                         logger.exception("Неожиданная ошибка в polling:")
-                        time.sleep(1)
+                        self._stop_event.wait(timeout=1)
 
         import signal as _signal
 
         def _stop(*_: Any) -> None:
             logger.info("Остановка бота...")
             self._running = False
+            self._stop_event.set()
+            self._bot.close()
 
         try:
             _signal.signal(_signal.SIGINT, _stop)
@@ -273,8 +292,9 @@ class Dispatcher:
         except (KeyboardInterrupt, SystemExit):
             logger.info("Остановка бота...")
             self._running = False
+            self._stop_event.set()
             self._bot.close()
-            thread.join(timeout=2)
+            thread.join(timeout=3)
         finally:
             self._call_handlers(self._shutdown_handlers)
             logger.info("Бот остановлен.")
@@ -295,13 +315,14 @@ class Dispatcher:
 
         self._running = True
         offset: int | None = None
+        _CHUNK = 1
 
         logger.info("Async polling запущен. Ctrl+C для остановки.")
         try:
             while self._running:
                 try:
                     updates = await self._bot.async_get_updates(
-                        offset=offset, timeout=POLLING_TIMEOUT
+                        offset=offset, timeout=_CHUNK
                     )
                     for update in updates:
                         offset = update["update_id"] + 1
@@ -312,16 +333,19 @@ class Dispatcher:
                                 "Ошибка при обработке update %d:", update["update_id"]
                             )
                 except NetworkError as e:
-                    logger.warning("Сетевая ошибка: %s.", e)
-                    await asyncio.sleep(3)
+                    if self._running:
+                        logger.warning("Сетевая ошибка: %s.", e)
+                        await asyncio.sleep(3)
                 except TelegramAPIError as e:
-                    logger.error("Telegram API ошибка: %s", e)
-                    await asyncio.sleep(1)
+                    if self._running:
+                        logger.error("Telegram API ошибка: %s", e)
+                        await asyncio.sleep(1)
                 except asyncio.CancelledError:
                     break
                 except Exception:
-                    logger.exception("Неожиданная ошибка:")
-                    await asyncio.sleep(1)
+                    if self._running:
+                        logger.exception("Неожиданная ошибка:")
+                        await asyncio.sleep(1)
         finally:
             await self._async_call_handlers(self._shutdown_handlers)
             await self._bot.async_close()
@@ -330,7 +354,7 @@ class Dispatcher:
     def run_async(self, *, drop_pending: bool = True) -> None:
         asyncio.run(self._async_polling(drop_pending=drop_pending))
 
-    def _run_webhook(self, host: str, port: int, url: str | None, backend: str = "raw") -> None:
+    def _run_webhook(self, host: str, port: int, url: str | None, backend: str = "raw", secret_token: str | None = None) -> None:
         from gramix.env import get_webhook_url
 
         webhook_url = url or get_webhook_url()
@@ -339,7 +363,8 @@ class Dispatcher:
                 "URL webhook не указан. Передай параметр url= или установи WEBHOOK_URL в .env."
             )
 
-        self._bot.set_webhook(webhook_url)
+        self._bot.set_webhook(webhook_url, secret_token=secret_token)
+        self._webhook_secret = secret_token
         me = self._bot.get_me()
         self._print_banner(me.username or str(me.id), me.id, f"webhook [{backend}] {webhook_url}")
         logger.info("Сервер: %s:%d", host, port)
@@ -465,6 +490,17 @@ class Dispatcher:
                         if ":" in line:
                             k, _, v = line.partition(":")
                             headers[k.strip().lower()] = v.strip()
+
+                    # Validate secret token if one was configured
+                    if self._webhook_secret is not None:
+                        incoming = headers.get("x-telegram-bot-api-secret-token", "")
+                        if incoming != self._webhook_secret:
+                            conn.send(
+                                b"HTTP/1.1 403 Forbidden\r\nContent-Length: 9\r\n"
+                                b"Content-Type: text/plain\r\n\r\nForbidden"
+                            )
+                            return
+
                     content_length = int(headers.get("content-length", 0))
                     while len(body_part) < content_length:
                         chunk = conn.recv(8192)
@@ -490,7 +526,7 @@ class Dispatcher:
                         "используй run_async() или объяви handler как sync-функцию.",
                         handler.__name__,
                     )
-                    asyncio.get_event_loop().run_until_complete(handler())
+                    asyncio.run(handler())
                 else:
                     handler()
             except Exception:
