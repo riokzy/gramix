@@ -7,7 +7,6 @@ dp  = Dispatcher(bot)
 rt  = Router()
 dp.include(rt)
 
-
 @rt.message("/start")
 def on_start(msg):
     msg.answer(
@@ -18,7 +17,6 @@ def on_start(msg):
         "Отправь мне свою геолокацию — я её обработаю"
     )
 
-
 @rt.message("/location")
 def cmd_location(msg):
     bot.send_location(
@@ -27,7 +25,6 @@ def cmd_location(msg):
         longitude=37.6173,
     )
     msg.answer("Вот Москва на карте!")
-
 
 @rt.message("/venue")
 def cmd_venue(msg):
@@ -40,7 +37,6 @@ def cmd_venue(msg):
         foursquare_id="4adcda04f964a52077e71fe3",
     )
 
-
 @rt.message("/live")
 def cmd_live(msg):
     bot.send_location(
@@ -50,7 +46,6 @@ def cmd_live(msg):
         live_period=300,
     )
     msg.answer("Живая геолокация активна на 5 минут.")
-
 
 @rt.message(F.location)
 def on_location(msg):
@@ -64,7 +59,6 @@ def on_location(msg):
         parts.append(f"Живая, период: {loc.live_period} с")
     msg.answer("\n".join(parts))
 
-
 @rt.message(F.venue)
 def on_venue(msg):
     v = msg.venue
@@ -73,7 +67,6 @@ def on_venue(msg):
         f"Адрес: {v.address}\n"
         f"Координаты: {v.location.latitude}, {v.location.longitude}"
     )
-
 
 if __name__ == "__main__":
     import logging

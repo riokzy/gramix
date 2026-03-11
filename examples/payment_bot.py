@@ -13,7 +13,6 @@ dp.include(rt)
 
 PROVIDER_TOKEN = "YOUR_PROVIDER_TOKEN"
 
-
 @rt.message("/start")
 def on_start(msg):
     msg.answer(
@@ -21,7 +20,6 @@ def on_start(msg):
         "/buy — купить товар (100 RUB)\n"
         "/donate — задонатить произвольную сумму"
     )
-
 
 @rt.message("/buy")
 def cmd_buy(msg):
@@ -38,7 +36,6 @@ def cmd_buy(msg):
         photo_height=256,
     )
 
-
 @rt.message("/donate")
 def cmd_donate(msg):
     bot.send_invoice(
@@ -53,11 +50,9 @@ def cmd_donate(msg):
         suggested_tip_amounts=[5000, 10000, 25000, 50000],
     )
 
-
 @rt.pre_checkout_query()
 def on_pre_checkout(query: PreCheckoutQuery):
     bot.answer_pre_checkout_query(query.id, ok=True)
-
 
 @rt.successful_payment()
 def on_payment(msg):
@@ -67,7 +62,6 @@ def on_payment(msg):
         f"Сумма: <b>{payment.amount_decimal} {payment.currency}</b>\n"
         f"Payload: <code>{payment.invoice_payload}</code>"
     )
-
 
 if __name__ == "__main__":
     import logging

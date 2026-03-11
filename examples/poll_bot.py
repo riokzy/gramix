@@ -13,7 +13,6 @@ dp  = Dispatcher(bot)
 rt  = Router()
 dp.include(rt)
 
-
 @rt.message("/start")
 def on_start(msg):
     msg.answer(
@@ -25,7 +24,6 @@ def on_start(msg):
         "/stoppoll — reply to a poll to close it"
     )
 
-
 @rt.message("/poll")
 def send_regular_poll(msg):
     bot.send_poll(
@@ -34,7 +32,6 @@ def send_regular_poll(msg):
         options=["Python", "TypeScript", "Rust", "Go", "Other"],
         is_anonymous=True,
     )
-
 
 @rt.message("/multipoll")
 def send_multi_poll(msg):
@@ -45,7 +42,6 @@ def send_multi_poll(msg):
         is_anonymous=False,
         allows_multiple_answers=True,
     )
-
 
 @rt.message("/quiz")
 def send_quiz(msg):
@@ -67,7 +63,6 @@ def send_quiz(msg):
         is_anonymous=True,
     )
 
-
 @rt.message("/timedpoll")
 def send_timed_poll(msg):
     bot.send_poll(
@@ -77,7 +72,6 @@ def send_timed_poll(msg):
         open_period=60,
         is_anonymous=True,
     )
-
 
 @rt.message("/stoppoll")
 def cmd_stop_poll(msg):
@@ -92,7 +86,6 @@ def cmd_stop_poll(msg):
         message_id=msg.reply_to_message.message_id,
     )
     msg.answer(f"Poll closed. Final total: <b>{poll.total_voter_count}</b> votes.")
-
 
 @rt.poll_answer()
 def on_poll_answer(answer: PollAnswer):
@@ -111,7 +104,6 @@ def on_poll_answer(answer: PollAnswer):
         f"Thanks, <b>{name}</b>! You picked: {chosen}.",
     )
 
-
 @rt.message(F.quiz)
 def on_quiz_message(msg):
     poll = msg.poll
@@ -120,7 +112,6 @@ def on_quiz_message(msg):
         f"Forwarded quiz: <b>{poll.question}</b>\n"
         f"Correct answer: <b>{correct}</b>"
     )
-
 
 @rt.message(F.poll)
 def on_poll_message(msg):
@@ -131,7 +122,6 @@ def on_poll_message(msg):
         f"Forwarded {kind} (<i>{status}</i>): <b>{poll.question}</b>\n"
         f"Total votes: {poll.total_voter_count}"
     )
-
 
 if __name__ == "__main__":
     import logging

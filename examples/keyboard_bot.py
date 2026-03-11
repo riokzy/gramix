@@ -7,7 +7,6 @@ bot = Bot()
 rt  = Router()
 dp  = Dispatcher(bot)
 
-
 def main_menu() -> Inline:
     kb = Inline()
     kb.button("📋 Команды", callback="menu:commands")
@@ -16,18 +15,15 @@ def main_menu() -> Inline:
     kb.button("🌐 Сайт", url="https://github.com/riokzy/gramix")
     return kb
 
-
 @rt.message("/start")
 def on_start(msg):
     kb = Reply(resize=True)
     kb.button("📋 Меню")
     msg.reply("Привет! Выбери раздел:", keyboard=kb)
 
-
 @rt.message("📋 Меню")
 def on_menu(msg):
     msg.reply("Главное меню:", keyboard=main_menu())
-
 
 @rt.callback("menu:commands")
 def on_commands(call):
@@ -41,7 +37,6 @@ def on_commands(call):
     kb.button("🔙 Назад", callback="menu:back")
     call.message.edit(text, keyboard=kb, parse_mode=ParseMode.HTML)
 
-
 @rt.callback("menu:about")
 def on_about(call):
     call.answer()
@@ -50,12 +45,10 @@ def on_about(call):
     kb.button("🔙 Назад", callback="menu:back")
     call.message.edit(text, keyboard=kb, parse_mode=ParseMode.HTML)
 
-
 @rt.callback("menu:back")
 def on_back(call):
     call.answer()
     call.message.edit("Главное меню:", keyboard=main_menu())
-
 
 dp.include(rt)
 

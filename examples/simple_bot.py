@@ -7,7 +7,6 @@ bot = Bot()
 rt  = Router()
 dp  = Dispatcher(bot)
 
-
 @rt.message("/start")
 def on_start(msg):
     msg.reply(
@@ -16,7 +15,6 @@ def on_start(msg):
         parse_mode=ParseMode.HTML,
     )
 
-
 @rt.message("/help")
 def on_help(msg):
     msg.reply(
@@ -24,7 +22,6 @@ def on_help(msg):
         "/help  — помощь\n"
         "/info  — информация"
     )
-
 
 @rt.message("/info")
 def on_info(msg):
@@ -35,12 +32,10 @@ def on_info(msg):
         parse_mode=ParseMode.HTML,
     )
 
-
 @rt.message()
 def on_echo(msg):
     if msg.text:
         msg.reply(f"Эхо: {msg.text}")
-
 
 dp.include(rt)
 
