@@ -4,26 +4,15 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "gramix"
-version = "0.1.8"
+version = "0.1.9"
 description = "A fast, fully-typed Python framework for building Telegram bots."
-readme = "README_pypi.md"
+authors = [{ name = "riokzy", email = "riokzy.official@gmail.com" }]
 license = "MIT"
+readme = "README_pypi.md"
 requires-python = ">=3.10"
-authors = [
-    { name = "riokzy", email = "riokzy.official@gmail.com" }
-]
 keywords = [
-    "telegram",
-    "bot",
-    "framework",
-    "fsm",
-    "finite-state-machine",
-    "middleware",
-    "webhooks",
-    "async",
-    "asyncio",
-    "typed",
-    "gramix",
+    "telegram", "bot", "framework", "fsm", "finite-state-machine",
+    "middleware", "webhooks", "async", "asyncio", "typed", "gramix",
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -42,30 +31,20 @@ classifiers = [
     "Framework :: AsyncIO",
     "Typing :: Typed",
 ]
-dependencies = [
-    "httpx>=0.24.0",
-]
+dependencies = ["httpx>=0.24.0"]
 
 [project.optional-dependencies]
 aiohttp = ["aiohttp>=3.9"]
 fastapi = ["fastapi>=0.100", "uvicorn>=0.20"]
-dev = [
-    "pytest>=7.0",
-    "pytest-asyncio>=0.21",
-    "black>=23.0",
-    "mypy>=1.0",
-]
+dev = ["pytest>=7.0", "pytest-asyncio>=0.21", "black>=23.0", "mypy>=1.0"]
 
 [project.urls]
-Homepage = "https://github.com/riokzyofficial-debug/gramix"
-Repository = "https://github.com/riokzyofficial-debug/gramix"
-Documentation = "https://github.com/riokzyofficial-debug/gramix#readme"
-"Bug Tracker" = "https://github.com/riokzyofficial-debug/gramix/issues"
-Changelog = "https://github.com/riokzyofficial-debug/gramix/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/riokzy/gramix"
+Repository = "https://github.com/riokzy/gramix"
+Documentation = "https://github.com/riokzy/gramix#readme"
+"Bug Tracker" = "https://github.com/riokzy/gramix/issues"
+Changelog = "https://github.com/riokzy/gramix/blob/main/CHANGELOG.md"
 
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["gramix*"]
-
-[tool.setuptools.package-data]
-gramix = ["py.typed"]

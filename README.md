@@ -102,7 +102,7 @@ python bot.py
 
 **`Router`** declares handlers for messages, callbacks, inline queries, and FSM states. Multiple routers can be included in one dispatcher.
 
-**`F`** is a filter shortcut object for common conditions: `F.photo`, `F.document`, `F.sticker`, `F.voice`, `F.text`, `F.reply`, `F.forward`, `F.private`, `F.group`.
+**`F`** is a filter shortcut object for common conditions: `F.photo`, `F.document`, `F.sticker`, `F.voice`, `F.text`, `F.reply`, `F.forward`, `F.private`, `F.group`, `F.supergroup`, `F.channel`.
 
 **`State` / `Step`** define FSM flows. Steps are declared as class attributes and traversed with `ctx.next()`, `ctx.prev()`, or `ctx.finish()`.
 
@@ -461,6 +461,26 @@ def on_inline(query):
         ),
     ]
     query.answer(results, cache_time=10)
+```
+
+---
+
+### Edited Messages & Channel Posts
+
+Handle edited messages separately from new ones:
+
+```python
+@rt.edited_message(F.text)
+def on_edit(msg):
+    msg.answer(f"You edited your message to: {msg.text}")
+
+@rt.channel_post()
+def on_channel_post(msg):
+    print(f"New post in {msg.chat.display_name}: {msg.text}")
+
+@rt.edited_channel_post()
+def on_edited_channel_post(msg):
+    print(f"Post edited in {msg.chat.display_name}")
 ```
 
 ---

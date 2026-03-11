@@ -5,6 +5,48 @@ This project follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.1.9] — 2026-03-11
+
+> Dedicated bug-fix release. No new features — every change here is a correction of incorrect, incomplete, or unsafe behaviour present in 0.1.8.
+
+### Added
+- `BotCommand` type — structured representation of a bot command for `set_my_commands`; replaces raw `dict`.
+- `ChatPermissions` type — structured permissions object for `restrict_chat_member`; replaces raw `dict`.
+
+### Fixed
+
+**`filters.py`**
+- `F.supergroup` and `F.channel` were documented and exported but never defined on the `F` class — added `SupergroupChatFilter` and `ChannelChatFilter` and wired them up as `F.supergroup` / `F.channel`.
+
+**`dispatcher.py`**
+- `edited_message`, `channel_post`, and `edited_channel_post` updates were silently routed through the normal message pipeline — each update type now has its own routing path in both sync and async modes.
+- Middleware was only applied to `message` updates. All other update types — `callback_query`, `inline_query`, `poll_answer`, `pre_checkout_query`, `chat_member` / `my_chat_member` — bypassed the middleware chain entirely. Middleware is now applied uniformly to every update type.
+- `_call_handlers` called `asyncio.run(handler())` on async lifecycle hooks, which raises `RuntimeError: This event loop is already running` in webhook mode. It now detects a running loop and schedules the coroutine safely via `run_coroutine_threadsafe`.
+
+**`router.py`**
+- Added `@rt.edited_message()`, `@rt.channel_post()`, and `@rt.edited_channel_post()` decorators with corresponding `process_*` / `async_process_*` methods.
+
+**`fsm.py`**
+- `MemoryStorage` was not thread-safe. Added `threading.Lock` consistent with `SQLiteStorage`.
+
+**`throttling.py`**
+- `_last_seen` grew without bound — memory leak in long-running bots. A cleanup pass now runs when the dictionary exceeds 10 000 entries.
+- `_is_throttled` had a race condition in async mode: two coroutines could simultaneously read `_last_seen`, both find `None`, and both pass the rate check. Protected with `threading.Lock`.
+
+**`bot.py`**
+- `send_message` / `async_send_message` with `auto_split=True` attached the `keyboard` to every chunk instead of only the last one. The keyboard is now forwarded only to the last chunk (sync + async).
+- `set_my_commands` now accepts `list[BotCommand]` instead of `list[dict]`.
+- `restrict_chat_member` now accepts `ChatPermissions` instead of a raw `dict`.
+- `send_invoice` now accepts `list[LabeledPrice]` instead of an untyped `list`.
+
+**`env.py`**
+- `load_env` used `.partition("=")` which silently truncated values containing `=` (e.g. base64 tokens, JWT secrets, API keys). Now uses `split("=", 1)` and strips only matching surrounding quotes, preserving the full value.
+
+**`types/inline_query.py`**
+- `InlineQuery.answer()` had a type annotation of `list[InlineQueryResultArticle]`, rejecting all other result types at static-analysis time. The annotation is now a proper union of all supported result types.
+
+---
+
 ## [0.1.8] — 2026-03-10
 
 > First official release on PyPI. Consolidates all development from 0.1.0–0.1.7 with polling performance improvements and full Telegram Bot API coverage.
