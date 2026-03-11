@@ -1,7 +1,6 @@
 from __future__ import annotations
 from dataclasses import dataclass
 
-
 @dataclass(slots=True)
 class Location:
     longitude: float
@@ -21,7 +20,6 @@ class Location:
             heading=data.get("heading"),
             proximity_alert_radius=data.get("proximity_alert_radius"),
         )
-
 
 @dataclass(slots=True)
 class Venue:

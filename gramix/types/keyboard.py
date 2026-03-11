@@ -3,7 +3,6 @@ from dataclasses import dataclass
 
 from gramix.constants import MAX_CALLBACK_DATA_LENGTH
 
-
 @dataclass(slots=True)
 class InlineButton:
     text: str
@@ -27,7 +26,6 @@ class InlineButton:
         elif self.switch_inline_query_current_chat is not None:
             btn["switch_inline_query_current_chat"] = self.switch_inline_query_current_chat
         return btn
-
 
 class Inline:
     def __init__(self) -> None:
@@ -62,7 +60,6 @@ class Inline:
         rows = [row for row in self._rows if row]
         return {"inline_keyboard": [[btn.to_dict() for btn in row] for row in rows]}
 
-
 @dataclass(slots=True)
 class ReplyButton:
     text: str
@@ -76,7 +73,6 @@ class ReplyButton:
         if self.request_location:
             btn["request_location"] = True
         return btn
-
 
 class Reply:
     def __init__(
@@ -113,7 +109,69 @@ class Reply:
             result["input_field_placeholder"] = self._placeholder
         return result
 
-
 class RemoveKeyboard:
     def to_dict(self) -> dict:
         return {"remove_keyboard": True}
+
+class BotCommand:
+    __slots__ = ("command", "description")
+
+    def __init__(self, command: str, description: str) -> None:
+        if not command.startswith("/"):
+            command = f"/{command}"
+        self.command = command.lstrip("/")
+        self.description = description
+
+    def to_dict(self) -> dict:
+        return {"command": self.command, "description": self.description}
+
+    def __repr__(self) -> str:
+        return f"BotCommand(/{self.command!r}, {self.description!r})"
+
+class ChatPermissions:
+    __slots__ = (
+        "can_send_messages",
+        "can_send_media_messages",
+        "can_send_polls",
+        "can_send_other_messages",
+        "can_add_web_page_previews",
+        "can_change_info",
+        "can_invite_users",
+        "can_pin_messages",
+    )
+
+    def __init__(
+        self,
+        *,
+        can_send_messages: bool = False,
+        can_send_media_messages: bool = False,
+        can_send_polls: bool = False,
+        can_send_other_messages: bool = False,
+        can_add_web_page_previews: bool = False,
+        can_change_info: bool = False,
+        can_invite_users: bool = False,
+        can_pin_messages: bool = False,
+    ) -> None:
+        self.can_send_messages = can_send_messages
+        self.can_send_media_messages = can_send_media_messages
+        self.can_send_polls = can_send_polls
+        self.can_send_other_messages = can_send_other_messages
+        self.can_add_web_page_previews = can_add_web_page_previews
+        self.can_change_info = can_change_info
+        self.can_invite_users = can_invite_users
+        self.can_pin_messages = can_pin_messages
+
+    def to_dict(self) -> dict:
+        return {
+            "can_send_messages": self.can_send_messages,
+            "can_send_media_messages": self.can_send_media_messages,
+            "can_send_polls": self.can_send_polls,
+            "can_send_other_messages": self.can_send_other_messages,
+            "can_add_web_page_previews": self.can_add_web_page_previews,
+            "can_change_info": self.can_change_info,
+            "can_invite_users": self.can_invite_users,
+            "can_pin_messages": self.can_pin_messages,
+        }
+
+    def __repr__(self) -> str:
+        return f"ChatPermissions(can_send_messages={self.can_send_messages})"

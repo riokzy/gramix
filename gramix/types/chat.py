@@ -2,13 +2,11 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import StrEnum
 
-
 class ChatType(StrEnum):
     PRIVATE = "private"
     GROUP = "group"
     SUPERGROUP = "supergroup"
     CHANNEL = "channel"
-
 
 @dataclass(frozen=True, slots=True)
 class Chat:

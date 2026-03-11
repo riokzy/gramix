@@ -3,7 +3,6 @@ from dataclasses import dataclass
 
 from gramix.types.user import User
 
-
 @dataclass(slots=True)
 class GameHighScore:
     position: int

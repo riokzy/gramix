@@ -3,7 +3,6 @@ from dataclasses import dataclass, field
 
 from gramix.types.user import User
 
-
 @dataclass(slots=True)
 class PollOption:
     text: str
@@ -15,7 +14,6 @@ class PollOption:
             text=data["text"],
             voter_count=data["voter_count"],
         )
-
 
 @dataclass(slots=True)
 class Poll:
@@ -44,7 +42,6 @@ class Poll:
             correct_option_id=data.get("correct_option_id"),
             explanation=data.get("explanation"),
         )
-
 
 @dataclass(slots=True)
 class PollAnswer:

@@ -7,7 +7,6 @@ from gramix.types.message import Message
 if TYPE_CHECKING:
     from gramix.bot import Bot
 
-
 class CallbackQuery:
     __slots__ = ("id", "from_user", "message", "data", "inline_message_id", "game_short_name", "_bot")
 

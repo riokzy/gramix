@@ -14,7 +14,6 @@ from gramix.exceptions import MessageError
 if TYPE_CHECKING:
     from gramix.bot import Bot
 
-
 @dataclass(slots=True)
 class PhotoSize:
     file_id: str
@@ -33,7 +32,6 @@ class PhotoSize:
             file_size=data.get("file_size"),
         )
 
-
 @dataclass(slots=True)
 class Document:
     file_id: str
@@ -51,7 +49,6 @@ class Document:
             mime_type=data.get("mime_type"),
             file_size=data.get("file_size"),
         )
-
 
 @dataclass(slots=True)
 class Audio:
@@ -77,7 +74,6 @@ class Audio:
             file_size=data.get("file_size"),
         )
 
-
 @dataclass(slots=True)
 class Video:
     file_id: str
@@ -102,7 +98,6 @@ class Video:
             file_size=data.get("file_size"),
         )
 
-
 @dataclass(slots=True)
 class Voice:
     file_id: str
@@ -120,7 +115,6 @@ class Voice:
             mime_type=data.get("mime_type"),
             file_size=data.get("file_size"),
         )
-
 
 @dataclass(slots=True)
 class Sticker:
@@ -145,7 +139,6 @@ class Sticker:
             emoji=data.get("emoji"),
             file_size=data.get("file_size"),
         )
-
 
 class Message:
     __slots__ = (

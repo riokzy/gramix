@@ -3,7 +3,6 @@ from dataclasses import dataclass, field
 
 from gramix.types.user import User
 
-
 @dataclass(slots=True)
 class OrderInfo:
     name: str | None = None
@@ -19,7 +18,6 @@ class OrderInfo:
             email=data.get("email"),
             shipping_address=data.get("shipping_address"),
         )
-
 
 @dataclass(slots=True)
 class PreCheckoutQuery:
@@ -47,7 +45,6 @@ class PreCheckoutQuery:
             order_info=OrderInfo.from_dict(data["order_info"]) if "order_info" in data else None,
         )
 
-
 @dataclass(slots=True)
 class SuccessfulPayment:
     currency: str
@@ -73,7 +70,6 @@ class SuccessfulPayment:
             shipping_option_id=data.get("shipping_option_id"),
             order_info=OrderInfo.from_dict(data["order_info"]) if "order_info" in data else None,
         )
-
 
 @dataclass(slots=True)
 class LabeledPrice:

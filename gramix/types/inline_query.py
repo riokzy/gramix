@@ -7,7 +7,6 @@ from gramix.types.user import User
 if TYPE_CHECKING:
     from gramix.bot import Bot
 
-
 @dataclass(slots=True)
 class InlineQueryResultArticle:
     id: str
@@ -30,7 +29,6 @@ class InlineQueryResultArticle:
         if self.parse_mode:
             result["input_message_content"]["parse_mode"] = self.parse_mode
         return result
-
 
 @dataclass(slots=True)
 class InlineQueryResultPhoto:
@@ -59,7 +57,6 @@ class InlineQueryResultPhoto:
             result["parse_mode"] = self.parse_mode
         return result
 
-
 @dataclass(slots=True)
 class InlineQueryResultGif:
     id: str
@@ -83,7 +80,6 @@ class InlineQueryResultGif:
         if self.parse_mode:
             result["parse_mode"] = self.parse_mode
         return result
-
 
 @dataclass(slots=True)
 class InlineQueryResultVideo:
@@ -113,7 +109,6 @@ class InlineQueryResultVideo:
             result["description"] = self.description
         return result
 
-
 @dataclass(slots=True)
 class InlineQueryResultDocument:
     id: str
@@ -139,7 +134,6 @@ class InlineQueryResultDocument:
         if self.description:
             result["description"] = self.description
         return result
-
 
 @dataclass(slots=True)
 class InlineQueryResultAudio:
@@ -168,7 +162,6 @@ class InlineQueryResultAudio:
             result["audio_duration"] = self.audio_duration
         return result
 
-
 class InlineQuery:
     __slots__ = ("id", "from_user", "query", "offset", "_bot")
 
@@ -188,7 +181,7 @@ class InlineQuery:
 
     def answer(
         self,
-        results: list[InlineQueryResultArticle],
+        results: list[InlineQueryResultArticle | InlineQueryResultPhoto | InlineQueryResultGif | InlineQueryResultVideo | InlineQueryResultDocument | InlineQueryResultAudio],
         *,
         cache_time: int = 300,
         is_personal: bool = False,
