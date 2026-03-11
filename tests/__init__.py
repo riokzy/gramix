@@ -1,1 +1,0 @@
-# gramix test suite
